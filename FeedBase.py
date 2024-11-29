@@ -1,6 +1,6 @@
-import csv
-from bs4 import BeautifulSoup
-from datetime import date
+import pandas as pd  # Importe la librairie pandas pour la manipulation des données
+from bs4 import BeautifulSoup  # Importe BeautifulSoup pour le parsing HTML
+from datetime import date  # Importe le module date pour obtenir la date actuelle
 
 def FeedBase():
     """
@@ -8,84 +8,66 @@ def FeedBase():
     """
     print("DÉBUT conversion des données en flux de produit Google Merchant Center")
 
-    fichier_csv_entree = "INPUTSOURCE/Product Template (product.template).csv"  # Fichier CSV d'entrée
-    aujourdhui = date.today().strftime("%d-%m-%Y")  # Date du jour au format JJ-MM-AAAA
+    fichier_csv_entree = "INPUTSOURCE/Product Template (product.template).csv"  # Chemin du fichier CSV d'entrée
+    aujourdhui = date.today().strftime("%d-%m-%Y")  # Obtient la date d'aujourd'hui au format JJ-MM-AAAA
     domaine = "https://www.micpartsonline.com"  # Domaine du site web
-    pays = "FR"  # Code pays
-    etat = "NEW" #condition de l'article
-    fichier_csv_sortie = f"FLUX_{pays}_{etat}_{aujourdhui}.csv"  # Nom du fichier CSV de sortie
-    creer_flux_merchant_center(fichier_csv_entree, fichier_csv_sortie, domaine, pays, etat)
+    pays = "FR"  # Code pays pour le flux (France)
+    etat = "NEW"  # Condition des articles (neuf)
+    fichier_csv_sortie = f"FLUX_{pays}_{etat}_{aujourdhui}.csv"  # Nom du fichier CSV de sortie, incluant la date
+    creer_flux_merchant_center(fichier_csv_entree, fichier_csv_sortie, domaine, pays, etat)  # Appelle la fonction pour créer le flux
 
     print(f"FIN conversion des données en flux de produit Google Merchant Center '{fichier_csv_sortie}'")
 
 def creer_flux_merchant_center(fichier_entree, fichier_sortie, domaine, pays, etat):
     """
-    Crée un flux de produits pour Google Merchant Center à partir d'un fichier CSV.
+    Crée le flux de produits pour Google Merchant Center.
 
     Args:
         fichier_entree: Chemin du fichier CSV d'entrée.
         fichier_sortie: Chemin du fichier CSV de sortie.
         domaine: Domaine du site web.
-        pays: Code pays.
-        etat: État de l'article (neuf, occasion, etc.). # Ajout de la description pour état
-
+        pays: Code pays pour le flux.
+        etat: Condition des articles.
     """
-
     try:
-        with open(fichier_entree, 'r', encoding='utf-8') as fichier_in, \
-                open(fichier_sortie, 'w', newline='', encoding='utf-8') as fichier_out:
+        df = pd.read_csv(fichier_entree, encoding='utf-8')  # Lit le fichier CSV d'entrée dans un DataFrame pandas
+                # Filtre les lignes sans ID *avant* toute autre opération
+        df = df.dropna(subset=['ID'])  # Supprime les lignes où la colonne 'id' est NaN
+        
 
-            lecteur = csv.DictReader(fichier_in)
-            noms_champs = ['id', 'brand','npm', 'title', 'description', 'link', 'image_link', 'availability', 'price', 'condition']
-            # Configuration de l'écriture du fichier CSV avec les noms de champs spécifiés
-            ecrivain = csv.DictWriter(fichier_out, fieldnames=noms_champs)
-            ecrivain.writeheader()
+        # Transformations des données avec pandas
+        df['brand'] = df['Brand'].fillna('MICPARTSONLINE').str[:50]  # Remplit les valeurs manquantes de la marque avec "MICPARTSONLINE" et limite à 50 caractères
+        df['npm'] = df['Internal Reference'].str[:50]  # limite à 50 caractères
+        df['title'] = df['Name'].str[:150] # limite à 150 caractères
 
-            for ligne in lecteur:
-                if ligne['ID'].strip():  # Vérifie si l'ID n'est pas vide ou ne contient que des espaces
+        # Traitement de la description
+        def clean_description(desc):
+            """Nettoie la description HTML et la tronque."""
+            if pd.notna(desc):  # Vérifie si la description n'est pas une valeur manquante (NaN)
+                soup = BeautifulSoup(str(desc), 'html.parser')  # Convertit en string avant d'utiliser BeautifulSoup, pour gérer les valeurs potentiellement non-string
+                return soup.get_text()[:5000]  # Extrait le texte brut de la description HTML et le limite à 5000 caractères
+            return "Contact us for more details!"  # Retourne une chaîne vide si la description est manquante
 
-                    brand =  ligne.get('Brand', '').strip() or 'MICPARTSONLINE', # Gère les marques manquantes, y compris les espaces indésirables.
-                    internal_ref = ligne.get('Internal Reference', "")
-                    name = ligne.get('Name', "")
-                    description = ligne.get('Description for the website', "")                    
-                    if description:  # Check if description is not empty
-                        soup = BeautifulSoup(description, 'html.parser')
-                        description = soup.get_text() # Extracts text content without HTML tags
-
-                    ligne_descriptif = f"{brand}-{internal_ref}-{name}-{description}"
-                    
-                    ligne_descriptif = ligne_descriptif.replace("--", "-") #handles consecutive missing fields
-                    ligne_descriptif = ligne_descriptif.strip("-") # remove leading/trailing hyphens
+        df['description_propre'] = df['Description for the website'].apply(clean_description)  # Applique la fonction clean_description à la colonne des descriptions
+        df['description'] = df['brand'].astype(str) + ' - ' + df['npm'].astype(str) + ' - ' + df['title'].astype(str) + ' - ' + df['description_propre'].astype(str) # Concatène les champs pour une description combinée.
+        df['description'] = df['description'].str[:5000]  # Tronque la description combinée à 5000 caractères.
 
 
-                    ligne_merchant = {
-                        'id': pays + etat.lower() + ligne['ID'], #ID avec code pays et condition de l'article
-
-                        'title': name[:150],  # Titre du produit (limité à 150 caractères)
-
-                        'brand': brand,
-
-                        'npm': internal_ref,
-
-                        'description': ligne_descriptif.strip('"')[:5000],  # Description du produit (limitée à 5000 caractères)
-
-                        'link': domaine + ligne['Website URL'],  # URL du produit
-
-                        'image_link': ligne['Product Images/Image URL'] if ligne['Product Images/Image URL'] else 'https://www.canva.com/design/DAGXtCWMDlU/nKItgvtsjC-dcrxFS_J2Gg/view?utm_content=DAGXtCWMDlU&utm_campaign=designshare&utm_medium=link&utm_source=editor',  # URL de l'image du produit
-                        
-                        'availability': 'in_stock',  # Disponibilité du produit
-
-                        'price': "{:.2f} CAD".format(float(ligne['Google Sales Price'])),  # Prix du produit (formaté à deux décimales)
-
-                        'condition': etat.lower()  # État du produit
-                    }
-                    ecrivain.writerow(ligne_merchant)  # écrit la ligne formaté
-
-    except FileNotFoundError:
-        print(f"Erreur : Fichier d'entrée '{fichier_entree}' introuvable.")
-    except Exception as e:
-        print(f"Une erreur est survenue : {e}")
+        df['id'] = etat + pays + df['ID'].astype(int).astype(str)  # Crée l'ID en combinant le pays, l'état et l'ID du produit
+        df['link'] = domaine + df['Website URL'].astype(str)  # Crée le lien en combinant le domaine et l'URL du produit
+        df['image_link'] = df['Product Images/Image URL'] # Utilise une image par défaut si l'URL de l'image est manquante
+        df['availability'] = 'in_stock'  # Définit la disponibilité sur "en stock"
+        df['price'] = df['Google Sales Price'].astype(float).map("{:.2f} CAD".format)  # Formate le prix avec deux décimales et la devise CAD
+        df['condition'] = etat.lower()  # Définit la condition en minuscules
 
 
 
+        # Sélectionne et réordonne les colonnes pour le fichier de sortie
+        output_columns = ['id', 'brand', 'npm', 'title', 'description', 'link', 'image_link','price','availability', 'condition']  # Liste des colonnes à inclure dans le fichier de sortie
+        df[output_columns].to_csv(fichier_sortie, index=False, encoding='utf-8')  # Écrit le DataFrame dans le fichier CSV de sortie
+
+    except FileNotFoundError:  # Gère l'erreur si le fichier d'entrée n'est pas trouvé
+        print(f"Error: Input file '{fichier_entree}' not found.")
+    except Exception as e:  # Gère les autres erreurs
+        print(f"An error occurred: {e}")
 
