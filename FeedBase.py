@@ -2,7 +2,7 @@ import pandas as pd  # Importe la librairie pandas pour la manipulation des donn
 from bs4 import BeautifulSoup  # Importe BeautifulSoup pour le parsing HTML
 from datetime import date  # Importe le module date pour obtenir la date actuelle
 
-def FeedBase():
+def FeedBaseNewFR():
     """
     Fonction principale pour convertir les données produits en un flux pour Google Merchant Center.
     """
@@ -13,6 +13,22 @@ def FeedBase():
     domaine = "https://www.micpartsonline.com"  # Domaine du site web
     pays = "FR"  # Code pays pour le flux (France)
     etat = "NEW"  # Condition des articles (neuf)
+    fichier_csv_sortie = f"FLUX_{pays}_{etat}_{aujourdhui}.csv"  # Nom du fichier CSV de sortie, incluant la date
+    creer_flux_merchant_center(fichier_csv_entree, fichier_csv_sortie, domaine, pays, etat)  # Appelle la fonction pour créer le flux
+
+    print(f"FIN conversion des données en flux de produit Google Merchant Center '{fichier_csv_sortie}'")
+
+def FeedBaseUsedFR():
+    """
+    Fonction principale pour convertir les données produits en un flux pour Google Merchant Center.
+    """
+    print("DÉBUT conversion des données en flux de produit Google Merchant Center")
+
+    fichier_csv_entree = "INPUTSOURCE/Product Template (product.template).csv"  # Chemin du fichier CSV d'entrée
+    aujourdhui = date.today().strftime("%d-%m-%Y")  # Obtient la date d'aujourd'hui au format JJ-MM-AAAA
+    domaine = "https://www.micpartsonline.com"  # Domaine du site web
+    pays = "FR"  # Code pays pour le flux (France)
+    etat = "USED"  # Condition des articles (neuf)
     fichier_csv_sortie = f"FLUX_{pays}_{etat}_{aujourdhui}.csv"  # Nom du fichier CSV de sortie, incluant la date
     creer_flux_merchant_center(fichier_csv_entree, fichier_csv_sortie, domaine, pays, etat)  # Appelle la fonction pour créer le flux
 

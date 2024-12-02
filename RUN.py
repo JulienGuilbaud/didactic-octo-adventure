@@ -9,13 +9,13 @@ import FeedBase
 
 def function1():
     # Code pour la fonction 1
-    FeedBase.FeedBase()
+    FeedBase.FeedBaseNewFR()
     goodbye()
 
 
 def function2():
     # Code pour la fonction 2
-    print("Function 2 executed")
+    FeedBase.FeedBaseUsedFR()
     goodbye()
 
 
@@ -53,10 +53,10 @@ except FileNotFoundError:
     print("Fichier du logo non trouvé.  Vérifiez le chemin : asset/2.png")  # Message d'erreur plus précis
 
 # Boutons
-button1 = ttk.Button(button_frame, text="Flux TEST (NEW PARTS)", command=function1) # Appeler la fonction FeedBase du module FeedBase
+button1 = ttk.Button(button_frame, text="Flux TEST (NEW parts FR)", command=function1) 
 button1.pack(pady=10)
 
-button2 = ttk.Button(button_frame, text="Function 2", command=function2)
+button2 = ttk.Button(button_frame, text="Flux TEST (USED parts FR)", command=function2)
 button2.pack(pady=10)
 
 button3 = ttk.Button(button_frame, text="Function 3", command=function3)
