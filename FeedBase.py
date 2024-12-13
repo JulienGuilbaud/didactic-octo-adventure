@@ -13,8 +13,9 @@ def FeedBaseNewFR():
     domaine = "https://www.micpartsonline.com"  # Domaine du site web
     pays = "FR"  # Code pays pour le flux (France)
     etat = "NEW"  # Condition des articles (neuf)
+    remise = 1.25  # Remise pour les prix
     fichier_csv_sortie = f"FLUX_{pays}_{etat}_{aujourdhui}.csv"  # Nom du fichier CSV de sortie, incluant la date
-    creer_flux_merchant_center(fichier_csv_entree, fichier_csv_sortie, domaine, pays, etat)  # Appelle la fonction pour créer le flux
+    creer_flux_merchant_center(fichier_csv_entree, fichier_csv_sortie, domaine, pays, etat, remise)  # Appelle la fonction pour créer le flux
 
     print(f"FIN conversion des données en flux de produit Google Merchant Center '{fichier_csv_sortie}'")
 
@@ -29,12 +30,13 @@ def FeedBaseUsedFR():
     domaine = "https://www.micpartsonline.com"  # Domaine du site web
     pays = "FR"  # Code pays pour le flux (France)
     etat = "USED"  # Condition des articles (neuf)
+    remise = 2  # Remise pour les prix
     fichier_csv_sortie = f"FLUX_{pays}_{etat}_{aujourdhui}.csv"  # Nom du fichier CSV de sortie, incluant la date
-    creer_flux_merchant_center(fichier_csv_entree, fichier_csv_sortie, domaine, pays, etat)  # Appelle la fonction pour créer le flux
+    creer_flux_merchant_center(fichier_csv_entree, fichier_csv_sortie, domaine, pays, etat, remise)  # Appelle la fonction pour créer le flux
 
     print(f"FIN conversion des données en flux de produit Google Merchant Center '{fichier_csv_sortie}'")
 
-def creer_flux_merchant_center(fichier_entree, fichier_sortie, domaine, pays, etat):
+def creer_flux_merchant_center(fichier_entree, fichier_sortie, domaine, pays, etat, remise):
     """
     Crée le flux de produits pour Google Merchant Center.
 
@@ -58,11 +60,12 @@ def creer_flux_merchant_center(fichier_entree, fichier_sortie, domaine, pays, et
 
         # Traitement de la description
         def clean_description(desc):
-            """Nettoie la description HTML et la tronque."""
-            if pd.notna(desc):  # Vérifie si la description n'est pas une valeur manquante (NaN)
-                soup = BeautifulSoup(str(desc), 'html.parser')  # Convertit en string avant d'utiliser BeautifulSoup, pour gérer les valeurs potentiellement non-string
-                return soup.get_text()[:5000]  # Extrait le texte brut de la description HTML et le limite à 5000 caractères
-            return "Contact us for more details!"  # Retourne une chaîne vide si la description est manquante
+            """Nettoie la description HTML, la tronque, et supprime les espaces inutiles."""
+            if pd.isna(desc):
+                return "Contact us for more details!"
+            text = BeautifulSoup(str(desc), 'html.parser').get_text()
+            cleaned_text = ' '.join(text.split())  
+            return cleaned_text[:5000]
 
         df['description_propre'] = df['Description for the website'].apply(clean_description)  # Applique la fonction clean_description à la colonne des descriptions
         df['description'] = df['brand'].astype(str) + ' - ' + df['npm'].astype(str) + ' - ' + df['title'].astype(str) + ' - ' + df['description_propre'].astype(str) # Concatène les champs pour une description combinée.
@@ -71,15 +74,17 @@ def creer_flux_merchant_center(fichier_entree, fichier_sortie, domaine, pays, et
 
         df['id'] = etat + pays + df['ID'].astype(int).astype(str)  # Crée l'ID en combinant le pays, l'état et l'ID du produit
         df['link'] = domaine + df['Website URL'].astype(str)  # Crée le lien en combinant le domaine et l'URL du produit
-        df['image_link'] = df['Product Images/Image URL'] # Utilise une image par défaut si l'URL de l'image est manquante
+        df['image_link'] = 'https://www.micpartsonline.com/web/image/product.product/'+df['ID'].astype(int).astype(str)+'/image_1024'    
+        df['additional_image_link'] = df['Product Images/Image URL'] 
         df['availability'] = 'in_stock'  # Définit la disponibilité sur "en stock"
-        df['price'] = df['Google Sales Price'].astype(float).map("{:.2f} CAD".format)  # Formate le prix avec deux décimales et la devise CAD
+        df['price'] = (df['Google Sales Price'].astype(float) * remise ).map("{:.2f} CAD".format)
+        df['sale_price'] = df['Google Sales Price'].astype(float).map("{:.2f} CAD".format)  # Formate le prix avec deux décimales et la devise CAD
         df['condition'] = etat.lower()  # Définit la condition en minuscules
 
 
 
         # Sélectionne et réordonne les colonnes pour le fichier de sortie
-        output_columns = ['id', 'brand', 'npm', 'title', 'description', 'link', 'image_link','price','availability', 'condition']  # Liste des colonnes à inclure dans le fichier de sortie
+        output_columns = ['id', 'brand', 'npm', 'title', 'description', 'link', 'image_link','additional_image_link','price','sale_price','availability', 'condition']  # Liste des colonnes à inclure dans le fichier de sortie
         df[output_columns].to_csv(fichier_sortie, index=False, encoding='utf-8')  # Écrit le DataFrame dans le fichier CSV de sortie
 
     except FileNotFoundError:  # Gère l'erreur si le fichier d'entrée n'est pas trouvé
