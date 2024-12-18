@@ -50,7 +50,7 @@ def creer_flux_merchant_center(fichier_entree, fichier_sortie, domaine, pays, et
     try:
         df = pd.read_csv(fichier_entree, encoding='utf-8')  # Lit le fichier CSV d'entrée dans un DataFrame pandas
                 # Filtre les lignes sans ID *avant* toute autre opération
-        df = df.dropna(subset=['ID'])  # Supprime les lignes où la colonne 'id' est NaN
+        df = df.dropna(subset=['Product/ID'])  # Supprime les lignes où la colonne 'id' est NaN
         
 
         # Transformations des données avec pandas
@@ -72,9 +72,9 @@ def creer_flux_merchant_center(fichier_entree, fichier_sortie, domaine, pays, et
         df['description'] = df['description'].str[:5000]  # Tronque la description combinée à 5000 caractères.
 
 
-        df['id'] = etat + pays + df['ID'].astype(int).astype(str)  # Crée l'ID en combinant le pays, l'état et l'ID du produit
+        df['id'] = etat + pays + df['Product/ID'].astype(int).astype(str)  # Crée l'ID en combinant le pays, l'état et l'ID du produit
         df['link'] = domaine + df['Website URL'].astype(str)  # Crée le lien en combinant le domaine et l'URL du produit
-        df['image_link'] = 'https://www.micpartsonline.com/web/image/product.product/'+df['ID'].astype(int).astype(str)+'/image_1024'    
+        df['image_link'] = 'https://www.micpartsonline.com/web/image/product.product/'+df['Product/ID'].astype(int).astype(str)+'/image_1024'    
         df['additional_image_link'] = df['Product Images/Image URL'] 
         df['availability'] = 'in_stock'  # Définit la disponibilité sur "en stock"
         df['price'] = (df['Google Sales Price'].astype(float) * remise ).map("{:.2f} CAD".format)
