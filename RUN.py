@@ -5,17 +5,17 @@ import tkinter.messagebox as messagebox
 from PIL import ImageTk, Image  
 
 #import des fonctions
-import FeedBase
+import ParametreFeed
 
 def function1():
     # Code pour la fonction 1
-    FeedBase.FeedBaseNewFR()
+    ParametreFeed.JGTEST()
     goodbye()
 
 
 def function2():
     # Code pour la fonction 2
-    FeedBase.FeedBaseUsedFR()
+    ParametreFeed.CAfr()
     goodbye()
 
 
@@ -53,10 +53,10 @@ except FileNotFoundError:
     print("Fichier du logo non trouvé.  Vérifiez le chemin : asset/2.png")  # Message d'erreur plus précis
 
 # Boutons
-button1 = ttk.Button(button_frame, text="Flux TEST (NEW parts FR)", command=function1) 
+button1 = ttk.Button(button_frame, text="TEST", command=function1) 
 button1.pack(pady=10)
 
-button2 = ttk.Button(button_frame, text="Flux TEST (USED parts FR)", command=function2)
+button2 = ttk.Button(button_frame, text="FluxCAfr", command=function2)
 button2.pack(pady=10)
 
 button3 = ttk.Button(button_frame, text="Function 3", command=function3)
