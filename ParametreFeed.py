@@ -17,7 +17,7 @@ def JGTEST():
    
     remise = 1.25  # Remise pour les prix
     fichier_csv_sortie = f"FLUX_{pays}{langue}_{aujourdhui}.csv"  # Nom du fichier CSV de sortie, incluant la date
-    FeedBase.creer_flux_merchant_center(fichier_csv_entree, fichier_csv_sortie, domaine, pays, langue, remise)  # Appelle la fonction pour créer le flux
+    FeedBase.creer_flux_merchant_center(fichier_csv_entree, fichier_csv_sortie, domaine, pays, langue, remise)  
 
     print(f"FIN conversion des données en flux de produit Google Merchant Center '{fichier_csv_sortie}'")
 
@@ -27,15 +27,32 @@ def CAfr():
     """
     print("DÉBUT conversion des données en flux de produit Google Merchant Center")
 
-    fichier_csv_entree = "INPUTSOURCE/Product Template (product.template).csv"  # Chemin du fichier CSV d'entrée
-    aujourdhui = date.today().strftime("%d-%m-%Y")  # Obtient la date d'aujourd'hui au format JJ-MM-AAAA
-    domaine = "https://www.micpartsonline.com"  # Domaine du site web
-    pays = "CA" # Code pays pour le flux (France)
+    fichier_csv_entree = "INPUTSOURCE/Product Template (product.template).csv"
+    aujourdhui = date.today().strftime("%d-%m-%Y")  
+    domaine = "https://www.micpartsonline.com"  
+    pays = "CA" 
 
     langue = "fr"
    
-    remise = 1.33  # Remise pour les prix
-    fichier_csv_sortie = f"FLUX_{pays}{langue}_{aujourdhui}.csv"  # Nom du fichier CSV de sortie, incluant la date
-    FeedBase.creer_flux_merchant_center(fichier_csv_entree, fichier_csv_sortie, domaine, pays, langue, remise)  # Appelle la fonction pour créer le flux
+    remise = 1.33  
+    fichier_csv_sortie = f"FLUX_{pays}{langue}_{aujourdhui}.csv"
+    FeedBase.creer_flux_merchant_center(fichier_csv_entree, fichier_csv_sortie, domaine, pays, langue, remise)  
+
+def CAen():
+    """
+    Fonction principale pour convertir les données produits en un flux pour Google Merchant Center.
+    """
+    print("DÉBUT conversion des données en flux de produit Google Merchant Center")
+
+    fichier_csv_entree = "INPUTSOURCE/Product Template (product.template).csv"  
+    aujourdhui = date.today().strftime("%d-%m-%Y")  
+    domaine = "https://www.micpartsonline.com/en"  
+    pays = "CA" 
+
+    langue = "en"
+   
+    remise = 1.33  
+    fichier_csv_sortie = f"FLUX_{pays}{langue}_{aujourdhui}.csv"  
+    FeedBase.creer_flux_merchant_center(fichier_csv_entree, fichier_csv_sortie, domaine, pays, langue, remise) 
 
     print(f"FIN conversion des données en flux de produit Google Merchant Center '{fichier_csv_sortie}'")

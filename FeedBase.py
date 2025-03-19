@@ -10,10 +10,12 @@ from data_processing import (
     process_image_link,
     process_additional_image_link,
     process_availability,
-    process_condition
+    process_condition,
+    format_price,
+    format_sale_price
 )
-from data_validation import validate_data
-from utils import format_price, format_sale_price
+
+
 
 def creer_flux_merchant_center(fichier_entree, fichier_sortie, domaine, pays, lang, remise):
     """
@@ -31,7 +33,7 @@ def creer_flux_merchant_center(fichier_entree, fichier_sortie, domaine, pays, la
         df = pd.read_csv(fichier_entree, encoding='utf-8')
 
         # Validation initiale
-        df = validate_data(df)
+        df = df.dropna(subset=['Product/ID'])
         print(f"Nombre de lignes après suppression des lignes sans Product/ID: {len(df)}")
 
         # Traitement des données
@@ -44,13 +46,13 @@ def creer_flux_merchant_center(fichier_entree, fichier_sortie, domaine, pays, la
         df['condition'] = process_condition(df['Product Category'])
         print(f"Traitement de la colonne 'condition' terminé. Nombre de lignes: {len(df)}")
 
-        df['title'] = process_title(df['brand'], df['npm'], df['Name'], df['Product Category'])
+        df['title'] = df.apply(lambda row: process_title(row['condition'], row['Name'], row['brand'], row['npm']), axis=1)
         print(f"Traitement de la colonne 'title' terminé. Nombre de lignes: {len(df)}")
 
         df['description_propre'] = df['Description for the website'].apply(clean_description)
         print(f"Traitement de la colonne 'description_propre' terminé. Nombre de lignes: {len(df)}")
 
-        df['description'] = process_description(df['brand'], df['npm'], df['title'], df['description_propre'])
+        df['description'] = process_description(df['brand'], df['npm'], df['description_propre'])
         print(f"Traitement de la colonne 'description' terminé. Nombre de lignes: {len(df)}")
 
         df['id'] = process_id(pays, lang, df['Product/ID'])

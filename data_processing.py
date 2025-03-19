@@ -19,20 +19,18 @@ def process_npm(npm_column):
 
 def process_condition(condition_column):
     """Traite la colonne 'condition'."""
-    return condition_column.str.lower()
+    return condition_column.astype(str).str.lower()
 
-def process_title(brand_column, npm_column, title_column, condition_column):
+def process_title(condition, title_column, brand_column, npm_column):
     """Traite la colonne 'title'."""
-    if condition_column == "New Parts":
-        return title_column.str[:150]
+    if str(condition).lower() == "new parts":
+        return str(title_column)[:150]
     else:
-        return (brand_column.astype(str) + ' ' + npm_column.astype(str) + ' ' +
-            title_column.astype(str)).str[:150]
+        return (str(brand_column)+' '+ str(npm_column)+' '+ str(title_column))[:150]
 
-def process_description(brand_column, npm_column, title_column, description_propre_column):
+def process_description(brand_column, npm_column, description_propre_column):
     """Traite la colonne 'description'."""
-    return (brand_column.astype(str) + ' - ' + npm_column.astype(str) + ' - ' +
-            title_column.astype(str) + ' - ' + description_propre_column.astype(str)).str[:5000]
+    return (brand_column.astype(str) + ' - ' + npm_column.astype(str)+ ' - ' + description_propre_column.astype(str)).str[:5000]
 
 def process_id(pays, lang, id_column):
     """Traite la colonne 'id'."""
@@ -53,5 +51,19 @@ def process_additional_image_link(additional_image_link_column):
 def process_availability():
     """Traite la colonne 'availability'."""
     return 'in_stock'
+
+def format_price(price, remise):
+    """Formate le prix en tenant compte de la remise et du cas où le prix est 0."""
+    if price == 0:
+        return "9999.99 CAD"
+    else:
+        return "{:.2f} CAD".format(price * remise)
+
+def format_sale_price(price):
+    """Formate le prix de vente en tenant compte du cas où le prix est 0."""
+    if price == 0:
+        return "9999.99 CAD"
+    else:
+        return "{:.2f} CAD".format(price)
 
 

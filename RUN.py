@@ -21,7 +21,7 @@ def function2():
 
 def function3():
     # Code pour la fonction 3
-    print("Function 3 executed")
+    ParametreFeed.CAen()
     goodbye()
 
 def goodbye():
@@ -59,7 +59,7 @@ button1.pack(pady=10)
 button2 = ttk.Button(button_frame, text="FluxCAfr", command=function2)
 button2.pack(pady=10)
 
-button3 = ttk.Button(button_frame, text="Function 3", command=function3)
+button3 = ttk.Button(button_frame, text="FluxCAen", command=function3)
 button3.pack(pady=10)
 
 button4 = ttk.Button(button_frame, text="Quiter", command=goodbye) # Correction orthographique: "Quitter"
