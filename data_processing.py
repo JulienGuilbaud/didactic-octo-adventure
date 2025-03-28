@@ -13,24 +13,24 @@ def process_brand(brand_column):
     """Traite la colonne 'brand'."""
     return brand_column.fillna('MICPARTSONLINE').str[:50]
 
-def process_npm(npm_column):
-    """Traite la colonne 'npm'."""
-    return npm_column.str[:50]
+def process_mpn(mpn_column):
+    """Traite la colonne 'mpn'."""
+    return mpn_column.str[:50]
 
 def process_condition(condition_column):
     """Traite la colonne 'condition'."""
     return condition_column.astype(str).str.lower()
 
-def process_title(condition, title_column, brand_column, npm_column):
+def process_title(condition, title_column, brand_column, mpn_column):
     """Traite la colonne 'title'."""
     if str(condition).lower() == "new parts":
         return str(title_column)[:150]
     else:
-        return (str(brand_column)+' '+ str(npm_column)+' '+ str(title_column))[:150]
+        return (str(brand_column)+' '+ str(mpn_column)+' '+ str(title_column))[:150]
 
-def process_description(brand_column, npm_column, description_propre_column):
+def process_description(brand_column, mpn_column, description_propre_column):
     """Traite la colonne 'description'."""
-    return (brand_column.astype(str) + ' - ' + npm_column.astype(str)+ ' - ' + description_propre_column.astype(str)).str[:5000]
+    return (brand_column.astype(str) + ' - ' + mpn_column.astype(str)+ ' - ' + description_propre_column.astype(str)).str[:5000]
 
 def process_id(pays, lang, id_column):
     """Traite la colonne 'id'."""

@@ -2,7 +2,7 @@ import pandas as pd
 from data_processing import (
     clean_description,
     process_brand,
-    process_npm,
+    process_mpn,
     process_title,
     process_description,
     process_id,
@@ -41,19 +41,19 @@ def creer_flux_merchant_center(fichier_entree, fichier_sortie, domaine, pays, la
         df['brand'] = process_brand(df['Brand'])
         print(f"Traitement de la colonne 'brand' terminé. Nombre de lignes: {len(df)}")
 
-        df['npm'] = process_npm(df['Internal Reference'])
-        print(f"Traitement de la colonne 'npm' terminé. Nombre de lignes: {len(df)}")
+        df['mpn'] = process_mpn(df['Internal Reference'])
+        print(f"Traitement de la colonne 'mpn' terminé. Nombre de lignes: {len(df)}")
 
         df['condition'] = process_condition(df['Product Category'])
         print(f"Traitement de la colonne 'condition' terminé. Nombre de lignes: {len(df)}")
 
-        df['title'] = df.apply(lambda row: process_title(row['condition'], row['Name'], row['brand'], row['npm']), axis=1)
+        df['title'] = df.apply(lambda row: process_title(row['condition'], row['Name'], row['brand'], row['mpn']), axis=1)
         print(f"Traitement de la colonne 'title' terminé. Nombre de lignes: {len(df)}")
 
         df['description_propre'] = df['Description for the website'].apply(clean_description)
         print(f"Traitement de la colonne 'description_propre' terminé. Nombre de lignes: {len(df)}")
 
-        df['description'] = process_description(df['brand'], df['npm'], df['description_propre'])
+        df['description'] = process_description(df['brand'], df['mpn'], df['description_propre'])
         print(f"Traitement de la colonne 'description' terminé. Nombre de lignes: {len(df)}")
 
         df['id'] = process_id(pays, lang, df['Product/ID'])
@@ -83,7 +83,7 @@ def creer_flux_merchant_center(fichier_entree, fichier_sortie, domaine, pays, la
 
 
         # Écriture du fichier de sortie
-        output_columns = ['id', 'brand', 'npm', 'title', 'description', 'link', 'image_link', 'additional_image_link', 'price', 'sale_price', 'availability', 'store_code', 'condition']
+        output_columns = ['id', 'brand', 'mpn', 'title', 'description', 'link', 'image_link', 'additional_image_link', 'price', 'sale_price', 'availability', 'store_code', 'condition']
         df[output_columns].to_csv(fichier_sortie, index=False, encoding='utf-8')
         print(f"Fichier de sortie '{fichier_sortie}' créé avec succès. Nombre de lignes: {len(df)}")
 
