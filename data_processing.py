@@ -24,7 +24,7 @@ def process_condition(condition_column):
 def process_title(condition, title_column, brand_column, mpn_column):
     """Traite la colonne 'title'."""
     if str(condition).lower() == "new parts":
-        return str(title_column)[:150]
+        return (str(brand_column)+' '+ str(title_column))[:150]
     else:
         return (str(brand_column)+' '+ str(mpn_column)+' '+ str(title_column))[:150]
 
