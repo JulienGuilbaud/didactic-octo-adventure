@@ -56,6 +56,10 @@ def process_store_code():
     """Traite la colonne 'availability'."""
     return 'entrepot-lévis'
 
+def process_google_product_category():
+    """Attribue l'ID de la catégorie de produits Google par défaut."""
+    return '8038'
+
 def format_price(price, remise):
     """Formate le prix en tenant compte de la remise et du cas où le prix est 0."""
     if price == 0:

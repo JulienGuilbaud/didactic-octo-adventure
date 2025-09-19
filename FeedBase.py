@@ -10,13 +10,12 @@ from data_processing import (
     process_image_link,
     process_additional_image_link,
     process_availability,
+    process_google_product_category,
     process_store_code,
     process_condition,
     format_price,
     format_sale_price
 )
-
-
 
 def creer_flux_merchant_center(fichier_entree, fichier_sortie, domaine, pays, lang, remise):
     """
@@ -70,6 +69,9 @@ def creer_flux_merchant_center(fichier_entree, fichier_sortie, domaine, pays, la
 
         df['availability'] = process_availability()
         print(f"Traitement de la colonne 'availability' terminé. Nombre de lignes: {len(df)}")
+        
+        df['google_product_category'] = process_google_product_category()
+        print(f"Traitement de la colonne 'google_product_category' terminé. Nombre de lignes: {len(df)}")
 
         df['store_code'] = process_store_code()
         print(f"Traitement de la colonne 'store_code' terminé. Nombre de lignes: {len(df)}")
@@ -80,10 +82,12 @@ def creer_flux_merchant_center(fichier_entree, fichier_sortie, domaine, pays, la
         df['sale_price'] = df['Google Sales Price'].apply(format_sale_price)
         print(f"Traitement de la colonne 'sale_price' terminé. Nombre de lignes: {len(df)}")
 
-
-
         # Écriture du fichier de sortie
-        output_columns = ['id', 'brand', 'mpn', 'title', 'description', 'link', 'image_link', 'additional_image_link', 'price', 'sale_price', 'availability', 'store_code', 'condition']
+        output_columns = [
+            'id', 'brand', 'mpn', 'title', 'description', 'link', 
+            'image_link', 'additional_image_link', 'price', 'sale_price', 
+            'availability', 'google_product_category', 'store_code', 'condition'  # <-- 3. AJOUTER LA COLONNE À LA LISTE DE SORTIE
+        ]
         df[output_columns].to_csv(fichier_sortie, index=False, encoding='utf-8')
         print(f"Fichier de sortie '{fichier_sortie}' créé avec succès. Nombre de lignes: {len(df)}")
 
